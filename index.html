@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Management Activity</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .chart {
+            display: none;
+            margin-top: 40px;
+            border: 1px solid #000;
+            width: 300px;
+            text-align: left;
+            padding: 10px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .entry {
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+        .selected {
+            background-color: lightblue;
+        }
+        #end-time-input {
+            width: 150px;
+        }
+        .logo {
+            width: 300px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <img src="/mnt/data/VH_logoEsportsTraining_Color_RGB.png" alt="Valhallan Esports Training Logo" class="logo">
+    <h1>Time Management Activity</h1>
+    <div id="question-container">
+        <p id="question">What are you doing at 12:00 AM?</p>
+        <input type="text" id="activity-input" placeholder="Enter activity">
+        <input type="time" id="end-time-input" placeholder="End time">
+        <button id="next-button">Next</button>
+    </div>
+    <div id="chart" class="chart">
+        <h2>Your Schedule</h2>
+        <div id="schedule"></div>
+    </div>
+    <script>
+        let schedule = [];
+        let currentHour = 0;
+        let currentMinute = 0;
+
+        function formatTime(hour, minute) {
+            let period = hour >= 12 ? "PM" : "AM";
+            let displayHour = hour % 12 === 0 ? 12 : hour % 12;
+            let displayMinutes = minute.toString().padStart(2, '0');
+            return `${displayHour}:${displayMinutes} ${period}`;
+        }
+
+        document.getElementById("next-button").addEventListener("click", function() {
+            submitActivity();
+        });
+
+        function submitActivity() {
+            let activityInput = document.getElementById("activity-input");
+            let endTimeInput = document.getElementById("end-time-input");
+            let activity = activityInput.value.trim();
+            let [endHour, endMinute] = endTimeInput.value.split(":").map(Number);
+
+            if (!activity) {
+                alert("Please enter an activity.");
+                return;
+            }
+            
+            if (isNaN(endHour) || isNaN(endMinute) || (endHour * 60 + endMinute) <= (currentHour * 60 + currentMinute)) {
+                alert("Invalid end time. Please enter a valid time later than the current one.");
+                return;
+            }
+            
+            let startTime = formatTime(currentHour, currentMinute);
+            let endTime = formatTime(endHour, endMinute);
+            schedule.push({ start: startTime, end: endTime, activity: activity });
+            updateChart();
+            
+            currentHour = endHour;
+            currentMinute = endMinute;
+            if (currentHour < 24 || (currentHour === 24 && currentMinute === 0)) {
+                document.getElementById("question").textContent = `What are you doing at ${formatTime(currentHour, currentMinute)}?`;
+                activityInput.value = "";
+                endTimeInput.value = "";
+                activityInput.focus();
+            } else {
+                document.getElementById("question-container").innerHTML = "<h3>Schedule Complete!</h3>";
+            }
+        }
+
+        function updateChart() {
+            document.getElementById("chart").style.display = "block";
+            let scheduleDiv = document.getElementById("schedule");
+            scheduleDiv.innerHTML = "";
+            schedule.forEach(entry => {
+                let div = document.createElement("div");
+                div.classList.add("entry");
+                div.textContent = `${entry.start} - ${entry.end}: ${entry.activity}`;
+                scheduleDiv.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
