@@ -126,6 +126,8 @@
             updateChart();
             document.getElementById("activity-input").value = "";
             document.getElementById("end-time-input").value = "";
+            currentHour = schedule.length > 0 ? convertTo24Hour(schedule[schedule.length - 1].end)[0] : currentHour;
+            currentMinute = schedule.length > 0 ? convertTo24Hour(schedule[schedule.length - 1].end)[1] : currentMinute;
             document.getElementById("question").textContent = `What are you doing at ${formatTime(currentHour, currentMinute)}?`;
         }
 
