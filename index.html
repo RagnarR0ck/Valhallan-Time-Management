@@ -122,18 +122,23 @@
                 schedule.push({ start: startTime, end: endTime, activity: activity });
             }
             
-            currentHour = endHour;
-            currentMinute = endMinute;
+            updateStartTimes();
             updateChart();
             document.getElementById("activity-input").value = "";
             document.getElementById("end-time-input").value = "";
             document.getElementById("question").textContent = `What are you doing at ${formatTime(currentHour, currentMinute)}?`;
         }
 
+        function updateStartTimes() {
+            for (let i = 1; i < schedule.length; i++) {
+                schedule[i].start = schedule[i - 1].end;
+            }
+        }
+
         function updateChart() {
             let studentName = document.getElementById("student-name").value.trim() || "Your";
             document.getElementById("schedule-title").textContent = `${studentName}'s Schedule`;
-            document.getElementById("chart").style.display = "block";
+            document.getElementById("chart").style.display = schedule.length > 0 ? "block" : "none";
             let scheduleDiv = document.getElementById("schedule");
             scheduleDiv.innerHTML = "";
             schedule.forEach((entry, index) => {
