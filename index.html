@@ -120,10 +120,10 @@
                 editingIndex = null;
             } else {
                 schedule.push({ start: startTime, end: endTime, activity: activity });
-                currentHour = endHour;
-                currentMinute = endMinute;
             }
             
+            currentHour = endHour;
+            currentMinute = endMinute;
             updateChart();
             document.getElementById("activity-input").value = "";
             document.getElementById("end-time-input").value = "";
