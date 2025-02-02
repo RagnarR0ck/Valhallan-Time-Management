@@ -126,6 +126,7 @@
             }
             
             updateChart();
+            document.getElementById("question").textContent = `What are you doing at ${formatTime(currentHour, currentMinute)}?`;
         }
 
         function updateChart() {
