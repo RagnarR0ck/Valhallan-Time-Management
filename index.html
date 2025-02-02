@@ -125,6 +125,8 @@
             }
             
             updateChart();
+            document.getElementById("activity-input").value = "";
+            document.getElementById("end-time-input").value = "";
             document.getElementById("question").textContent = `What are you doing at ${formatTime(currentHour, currentMinute)}?`;
         }
 
