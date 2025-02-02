@@ -13,18 +13,35 @@
             display: none;
             margin-top: 40px;
             border: 1px solid #000;
-            width: 300px;
+            width: 80%;
+            max-width: 800px;
             text-align: left;
             padding: 10px;
             margin-left: auto;
             margin-right: auto;
         }
+        .chart h2 {
+            text-align: center;
+        }
         .entry {
             padding: 5px;
             border-bottom: 1px solid #ccc;
+            position: relative;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .selected {
-            background-color: lightblue;
+        .edit-button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 3px 6px;
+            cursor: pointer;
+            font-size: 12px;
         }
         #end-time-input {
             width: 150px;
@@ -34,31 +51,47 @@
             margin-top: 20px;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
     <img src="VH_logoEsportsTraining_Color_RGB.png" alt="Valhallan Esports Training Logo" class="logo">
     <h1>Time Management Activity</h1>
+    <label for="student-name">Your Name:</label>
+    <input type="text" id="student-name" placeholder="Enter your name">
     <div id="question-container">
-        <p id="question">What are you doing at 12:00 AM?</p>
+        <p id="question" style="font-size: 1.2em;">What are you doing at 12:00 AM?</p>
         <input type="text" id="activity-input" placeholder="Enter activity">
-        <input type="time" id="end-time-input" placeholder="End time">
+        <label for="end-time-input">Activity End Time:</label>
+        <input type="time" id="end-time-input" placeholder="Enter activity end time">
         <button id="next-button">Next</button>
     </div>
     <div id="chart" class="chart">
-        <h2>Your Schedule</h2>
+        <h2 id="schedule-title">Your Schedule</h2>
         <div id="schedule"></div>
     </div>
     <script>
+        function formatTime(hour, minute) {
+            let period = hour >= 12 ? 'PM' : 'AM';
+            let displayHour = hour % 12 === 0 ? 12 : hour % 12;
+            let displayMinute = String(minute).padStart(2, '0');
+            return `${displayHour}:${displayMinute} ${period}`;
+        }
+
+        function convertTo24Hour(timeString) {
+            let match = timeString.match(/(\d+):(\d+)\s?(AM|PM)?/i);
+            if (!match) return [0, 0];
+            let hour = parseInt(match[1]);
+            let minute = parseInt(match[2]);
+            let period = match[3] ? match[3].toUpperCase() : null;
+            if (period === "PM" && hour !== 12) hour += 12;
+            if (period === "AM" && hour === 12) hour = 0;
+            return [hour, minute];
+        }
+
         let schedule = [];
         let currentHour = 0;
         let currentMinute = 0;
-
-        function formatTime(hour, minute) {
-            let period = hour >= 12 ? "PM" : "AM";
-            let displayHour = hour % 12 === 0 ? 12 : hour % 12;
-            let displayMinutes = minute.toString().padStart(2, '0');
-            return `${displayHour}:${displayMinutes} ${period}`;
-        }
+        let editingIndex = null;
 
         document.getElementById("next-button").addEventListener("click", function() {
             submitActivity();
@@ -82,32 +115,42 @@
             
             let startTime = formatTime(currentHour, currentMinute);
             let endTime = formatTime(endHour, endMinute);
-            schedule.push({ start: startTime, end: endTime, activity: activity });
-            updateChart();
-            
-            currentHour = endHour;
-            currentMinute = endMinute;
-            if (currentHour < 24 || (currentHour === 24 && currentMinute === 0)) {
-                document.getElementById("question").textContent = `What are you doing at ${formatTime(currentHour, currentMinute)}?`;
-                activityInput.value = "";
-                endTimeInput.value = "";
-                activityInput.focus();
+
+            if (editingIndex !== null) {
+                schedule[editingIndex] = { start: startTime, end: endTime, activity: activity };
+                editingIndex = null;
             } else {
-                document.getElementById("question-container").innerHTML = "<h3>Schedule Complete!</h3>";
+                schedule.push({ start: startTime, end: endTime, activity: activity });
+                currentHour = endHour;
+                currentMinute = endMinute;
             }
+            
+            updateChart();
         }
 
         function updateChart() {
+            let studentName = document.getElementById("student-name").value.trim() || "Your";
+            document.getElementById("schedule-title").textContent = `${studentName}'s Schedule`;
             document.getElementById("chart").style.display = "block";
             let scheduleDiv = document.getElementById("schedule");
             scheduleDiv.innerHTML = "";
-            schedule.forEach(entry => {
+            schedule.forEach((entry, index) => {
                 let div = document.createElement("div");
                 div.classList.add("entry");
                 div.textContent = `${entry.start} - ${entry.end}: ${entry.activity}`;
+                
+                let editButton = document.createElement("button");
+                editButton.classList.add("edit-button");
+                editButton.textContent = "Edit";
+                editButton.addEventListener("click", function() {
+                    editEntry(index);
+                });
+                div.appendChild(editButton);
+                
                 scheduleDiv.appendChild(div);
             });
         }
+    </script>
     </script>
 </body>
 </html>
