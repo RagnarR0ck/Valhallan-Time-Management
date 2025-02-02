@@ -51,7 +51,6 @@
             margin-top: 20px;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
     <img src="VH_logoEsportsTraining_Color_RGB.png" alt="Valhallan Esports Training Logo" class="logo">
@@ -151,7 +150,18 @@
                 scheduleDiv.appendChild(div);
             });
         }
-    </script>
+        
+        function editEntry(index) {
+            let entry = schedule[index];
+            document.getElementById("activity-input").value = entry.activity;
+            let [startHour, startMinute] = convertTo24Hour(entry.start);
+            let [endHour, endMinute] = convertTo24Hour(entry.end);
+            document.getElementById("end-time-input").value = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+            editingIndex = index;
+            currentHour = startHour;
+            currentMinute = startMinute;
+            document.getElementById("question").textContent = `Editing: What were you doing at ${formatTime(currentHour, currentMinute)}?`;
+        }
     </script>
 </body>
 </html>
